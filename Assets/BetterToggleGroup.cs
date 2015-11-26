@@ -1,25 +1,44 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using System;
 using System.Linq;
 
 public class BetterToggleGroup : ToggleGroup {
 	public delegate void ChangedEventHandler(Toggle newActive);
+
+    public event ChangedEventHandler OnChange;
 	public void Start() {
 		foreach (Transform transformToggle in gameObject.transform) {
 			var toggle = transformToggle.gameObject.GetComponent<Toggle>();
-			Debug.Log(toggle.name);
 			toggle.onValueChanged.AddListener((isSelected) => {
 				if (!isSelected) {
 					return;
 				}
 				var activeToggle = Active();
-				Debug.Log(activeToggle.name);
+                DoOnChange(activeToggle);
 			});
 		}
 	}
 	public Toggle Active() {
 		return ActiveToggles().FirstOrDefault();
 	}
+
+    protected virtual void DoOnChange(Toggle newactive)
+    {
+        var handler = OnChange;
+        if (handler != null) handler(newactive);
+    }
+
+    public bool IsFluxDirectedIntoPage()
+    {
+        return Active().name == Main.StrIdCbIntoPage;
+    }
+
+    public bool IsFluxDirectedOutOfPage()
+    {
+        return Active().name == Main.StrIdCbOutOfPage;
+    }
+    public bool FluxDirectionIsInOrOutOfPage()
+    {
+        return IsFluxDirectedIntoPage() || IsFluxDirectedOutOfPage();
+    }
 }
